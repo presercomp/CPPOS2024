@@ -1,5 +1,5 @@
 package models;
-import controllers.Users;
+import controllers.Products;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,20 +7,18 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-public class UsersDAO {
-    
-    public boolean create(Users u){
+public class ProductsDAO {
+        public boolean create(Products u){
         //Creamos la consulta de insercion con preparedStatements
         //para evitar posibles injecciones de SQL
-        String sql = "INSERT INTO users (nickname, secret) VALUES (?, ?)";
+        String sql = "INSERT INTO products (name) VALUES (?)";
         try {
             //Nos conectamos a la base de datos
             Connection conn = DB.getConnection();
             //Procesamos la consulta
             PreparedStatement stmt = conn.prepareStatement(sql);
             //Definimos los valores para los dos parametros con ? en la consulta
-            stmt.setString(1, u.getNickname());
-            stmt.setString(2, u.getSecret());
+            stmt.setString(1, u.getName());
             //Ejecutamos la consulta y obtenemos los resultados
             int results = stmt.executeUpdate();
             //Si el resultado es mayor que cero, es que fue un exito
@@ -33,11 +31,11 @@ public class UsersDAO {
         }
     }
     
-    public List<Users> read() {
+    public List<Products> read() {
         //Creamos la consulta SQL para obtener todos los usuarios
-        String sql = "SELECT * FROM users";
+        String sql = "SELECT * FROM products";
         //Creamos un objeto de tipo ArrayList para almacenar los resultados
-        List<Users> users = new ArrayList<>();
+        List<Products> products = new ArrayList<>();
         try{
             //Establecemos la conexión
             Connection conn = DB.getConnection();
@@ -48,27 +46,26 @@ public class UsersDAO {
             //Recorremos los resultados y creamos un objeto a partir de ellos
             while(rs.next()){
                 //Creamos un objeto a partir de la clase Users 
-                Users u = new Users(
+                Products u = new Products(
                         rs.getInt("id"),
-                        rs.getString("nickname"),
-                        rs.getString("secret"),
+                        rs.getString("name"),
                         Boolean.parseBoolean(rs.getString("active"))
                 );
                 //Añadimos el objeto al ArrayList
-                users.add(u);
+                products.add(u);
             }
         }catch(SQLException x_X){
-            System.out.println("Error listando los usuarios");
+            System.out.println("Error listando los productos");
             System.out.println(x_X.getMessage());
         }
         //devolvemos el ArrayList con los objetos creados
-        return users;
+        return products;
     }
     
-    public Users read(int id) {
+    public Products read(int id) {
         //Creamos la consulta SQL para obtener el usuario del id indicado
-        String sql = "SELECT * FROM users WHERE id = "+id; 
-        Users u = null;
+        String sql = "SELECT * FROM products WHERE id = "+id; 
+        Products u = null;
         try{
             //Establecemos la conexión
             Connection conn = DB.getConnection();
@@ -78,10 +75,9 @@ public class UsersDAO {
             ResultSet rs = stmt.executeQuery();            
             if(rs.next()){
                 //Si el juego de resultados contiene datos, creamos el objeto 
-                u = new Users(
+                u = new Products(
                         rs.getInt("id"),
-                        rs.getString("nickname"),
-                        rs.getString("secret"),
+                        rs.getString("name"),                        
                         Boolean.parseBoolean(rs.getString("active"))
                 );                
             }
@@ -94,18 +90,17 @@ public class UsersDAO {
         return u;
     }
     
-    public Users read(String nick, String passcode) {
-        String sql = "SELECT * FROM users WHERE nickname = '"+nick+"' AND secret = '"+passcode+"';"; 
+    public Products read(String name) {
+        String sql = "SELECT * FROM products WHERE name = '"+name+"';"; 
         System.out.println(sql);
         try{
             Connection conn = DB.getConnection();            
             Statement stmt = conn.createStatement();            
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.next()){                
-                Users u = new Users(
+                Products u = new Products(
                         rs.getInt("id"),
-                        rs.getString("nickname"),
-                        rs.getString("secret"),
+                        rs.getString("name"),                        
                         Boolean.parseBoolean(rs.getString("active"))
                 );
                 return u;            
@@ -113,7 +108,7 @@ public class UsersDAO {
                 return null;
             }                        
         }catch(SQLException x_X){
-            System.out.println("Error listando al usuario");
+            System.out.println("Error listando al producto");
             System.out.println(x_X.getMessage());
             return null;
         }
